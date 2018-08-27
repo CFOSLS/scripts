@@ -1,5 +1,5 @@
 # scripts
-Visualization scrips which can be used for creating a series of pictures in ParaView, e.g., coming from AMR setup.  
+Visualization scrips which can be used to create a series of pictures in ParaView, e.g., coming from AMR setup.  
 The scripts are designed to work for vector or scalar data in *.vtk format which have been produced by 
 CFOSLS/mfem visualization routines. For example, look at CFOSLS/mfem/examples/cfosls_hyperbolic_adref_Hcurl_new.cpp with
 output_solution = true, which produces the correct input data.
