@@ -73,10 +73,10 @@ if __name__ == '__main__':
 		           help='highest margin for the iso volume', default=10000)
 
 	parser.add_argument('-rel','--iso-relative', dest='relative', 
-		           help='Flag to treat iso-volume bounds as relative to data range if true, or as absolute values otherwise.', default=False, action='store_true')
+		           help='Flag to treat iso-volume bounds as relative to data range (if active) or as absolute values (default).', default=False, action='store_true')
 
-	parser.add_argument('-par','--parallel', dest='parallel', 
-		           help='Flag to define whether the input is from a group of parallel processes.', default=False, action='store_true')
+	parser.add_argument('-par','--parallel', dest='parallel',  
+		           help='Flag to be used if the input comes from a group of parallel processes (changes the expected input filename(s) format). Switched off by default. ', default=False, action='store_true')
 
 	parser.add_argument('-np','--nprocs', dest='nprocs', type=int,
 		           help='Number of processes.', default=1)

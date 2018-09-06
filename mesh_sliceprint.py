@@ -558,7 +558,7 @@ def draw(input_fname, output_fname, with_slices):
 
 if __name__ == '__main__':
 	# Parsing the script input arguments
-	parser = argparse.ArgumentParser(description='Processing VTK output from MFEM for visualization via ParaView.')
+	parser = argparse.ArgumentParser(description='Processing VTK output from sliced MFEM meshes for visualization via ParaView.')
 
 	parser.add_argument('input_filename', type=str, help='input filename')
 
@@ -566,7 +566,7 @@ if __name__ == '__main__':
 		           help='output filename', default="")
 
 	parser.add_argument('-slices','--with-slices', dest='with_slices', 
-		           help='Flag to define whether we need to visualize with slices or with a transparent volume.', default=False, action='store_true')
+		           help='Flag to visualize with slices (default is a transparent volume instead).', default=False, action='store_true')
 
 	args = parser.parse_args()
 

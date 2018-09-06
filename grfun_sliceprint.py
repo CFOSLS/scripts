@@ -389,23 +389,71 @@ def draw(input_fname, output_fname, iso_bot, iso_top, relative, with_slices):
 	grfun_it0vtkDisplay.OpacityArray = ['POINTS', 'cell_scalars']
 	grfun_it0vtkDisplay.OpacityTransferFunction = 'PiecewiseFunction'
 
+	# Properties modified on renderView1.AxesGrid
+	renderView1.AxesGrid.Visibility = 1
+
 	# show color bar/color legend
-	grfun_it0vtkDisplay.SetScalarBarVisibility(renderView1, True)
+	#grfun_it0vtkDisplay.SetScalarBarVisibility(renderView1, True)
+
+	# set active source
+	SetActiveSource(grfun_it0vtk)
 
 	# show data in view
 	grfun_it0vtkDisplay = Show(grfun_it0vtk, renderView1)
 
-	# show color bar/color legend
-	grfun_it0vtkDisplay.SetScalarBarVisibility(renderView1, True)
+	# get color transfer function/color map for 'cell_scalars'
+	grfun_LUT = GetColorTransferFunction('cell_scalars')
 
 	# Rescale transfer function
 	grfun_LUT.RescaleTransferFunction(-0.00314239, 0.0308278)
 
-	# get opacity transfer function/opacity map for 'cell_scalars'
-	grfun_PWF = GetOpacityTransferFunction('cell_scalars')
+	#### saving camera placements for all active views
 
-	# Rescale transfer function
-	grfun_PWF.RescaleTransferFunction(-0.00314239, 0.0308278)
+	# current camera placement for renderView1
+	renderView1.CameraPosition = [1.429153224460805, -5.992468570970181, 2.6138957855611755]
+	renderView1.CameraViewUp = [-0.0920643033105146, 0.3795899568888681, 0.9205626696130237]
+	renderView1.CameraParallelScale = 1.7320508075688772
+
+	# create a new 'Iso Volume'
+	isoVolume1 = IsoVolume(Input=grfun_it0vtk)
+	isoVolume1.InputScalars = ['POINTS', 'cell_scalars']
+	isoVolume1.ThresholdRange = [iso_bot, iso_top]
+
+	# show data in view
+	isoVolume1Display = Show(isoVolume1, renderView1)
+	# trace defaults for the display properties.
+	isoVolume1Display.Representation = 'Surface'
+	isoVolume1Display.ColorArrayName = ['POINTS', 'cell_scalars']
+	isoVolume1Display.LookupTable = grfun_LUT
+	isoVolume1Display.OSPRayScaleArray = 'cell_scalars'
+	isoVolume1Display.OSPRayScaleFunction = 'PiecewiseFunction'
+	isoVolume1Display.SelectOrientationVectors = 'None'
+	isoVolume1Display.ScaleFactor = 0.2
+	isoVolume1Display.SelectScaleArray = 'cell_scalars'
+	isoVolume1Display.GlyphType = 'Arrow'
+	isoVolume1Display.PolarAxes = 'PolarAxesRepresentation'
+	isoVolume1Display.ScalarOpacityUnitDistance = 0.4193304265375669
+	isoVolume1Display.GaussianRadius = 0.1
+	isoVolume1Display.SetScaleArray = ['POINTS', 'cell_scalars']
+	isoVolume1Display.ScaleTransferFunction = 'PiecewiseFunction'
+	isoVolume1Display.OpacityArray = ['POINTS', 'cell_scalars']
+	isoVolume1Display.OpacityTransferFunction = 'PiecewiseFunction'
+
+	its_data = servermanager.Fetch(grfun_it0vtk)
+	print(its_data.GetCellData().GetNumberOfArrays())
+	print(its_data.GetCellData().GetArrayName(0))
+
+	smallest = its_data.GetCellData().GetArray('cell_scalars').GetRange()[0]
+	largest = its_data.GetCellData().GetArray('cell_scalars').GetRange()[1]
+	
+	if relative == True:
+		print("Recomputing iso-volume using input args as relative (from 0.0 to 1.0) to the data range")
+		iso_bot = smallest + (largest - smallest) * iso_bot
+		iso_top = smallest + (largest - smallest) * iso_top
+		isoVolume1.ThresholdRange = [iso_bot, iso_top]
+
+	# set active source
+	SetActiveSource(grfun_it0vtk)
 
 	if with_slices == True:
 		# create a new 'Slice'
@@ -581,75 +629,6 @@ def draw(input_fname, output_fname, iso_bot, iso_top, relative, with_slices):
 	# set active source
 	SetActiveSource(grfun_it0vtk)
 
-	# Properties modified on renderView1.AxesGrid
-	renderView1.AxesGrid.Visibility = 1
-
-	# show data in view
-	grfun_it0vtkDisplay = Show(grfun_it0vtk, renderView1)
-
-	# show color bar/color legend
-	grfun_it0vtkDisplay.SetScalarBarVisibility(renderView1, True)
-
-	# create a new 'Iso Volume'
-	isoVolume1 = IsoVolume(Input=grfun_it0vtk)
-	isoVolume1.InputScalars = ['POINTS', 'cell_scalars']
-	isoVolume1.ThresholdRange = [iso_bot, iso_top]
-
-	# show data in view
-	isoVolume1Display = Show(isoVolume1, renderView1)
-	# trace defaults for the display properties.
-	isoVolume1Display.Representation = 'Surface'
-	isoVolume1Display.ColorArrayName = ['POINTS', 'cell_scalars']
-	isoVolume1Display.LookupTable = grfun_LUT
-	isoVolume1Display.OSPRayScaleArray = 'cell_scalars'
-	isoVolume1Display.OSPRayScaleFunction = 'PiecewiseFunction'
-	isoVolume1Display.SelectOrientationVectors = 'None'
-	isoVolume1Display.ScaleFactor = 0.2
-	isoVolume1Display.SelectScaleArray = 'cell_scalars'
-	isoVolume1Display.GlyphType = 'Arrow'
-	isoVolume1Display.PolarAxes = 'PolarAxesRepresentation'
-	isoVolume1Display.ScalarOpacityUnitDistance = 0.4193304265375669
-	isoVolume1Display.GaussianRadius = 0.1
-	isoVolume1Display.SetScaleArray = ['POINTS', 'cell_scalars']
-	isoVolume1Display.ScaleTransferFunction = 'PiecewiseFunction'
-	isoVolume1Display.OpacityArray = ['POINTS', 'cell_scalars']
-	isoVolume1Display.OpacityTransferFunction = 'PiecewiseFunction'
-
-	SetActiveSource(isoVolume1)
-
-	its_data = servermanager.Fetch(grfun_it0vtk)
-	print(its_data.GetCellData().GetNumberOfArrays())
-	print(its_data.GetCellData().GetArrayName(0))
-
-	smallest = its_data.GetCellData().GetArray('cell_scalars').GetRange()[0]
-	largest = its_data.GetCellData().GetArray('cell_scalars').GetRange()[1]
-	
-	if relative == True:
-		print("Recomputing iso-volume using input args as relative (from 0.0 to 1.0) to the data range")
-		iso_bot = smallest + (largest - smallest) * iso_bot
-		iso_top = smallest + (largest - smallest) * iso_top
-		isoVolume1.ThresholdRange = [iso_bot, iso_top]
-
-
-	# set active source
-	SetActiveSource(grfun_it0vtk)
-
-	# show color bar/color legend
-	isoVolume1Display.SetScalarBarVisibility(renderView1, True)
-
-	# Rescale transfer function
-	grfun_LUT.RescaleTransferFunction(-0.00314239, 0.0308278)
-
-	# Rescale transfer function
-	grfun_PWF.RescaleTransferFunction(-0.00314239, 0.0308278)
-
-	#### saving camera placements for all active views
-
-	# current camera placement for renderView1
-	renderView1.CameraPosition = [1.429153224460805, -5.992468570970181, 2.6138957855611755]
-	renderView1.CameraViewUp = [-0.0920643033105146, 0.3795899568888681, 0.9205626696130237]
-	renderView1.CameraParallelScale = 1.7320508075688772
-
 	# save screenshot
 	SaveScreenshot(output_filename, magnification=1, quality=100, view=renderView1)
 
@@ -659,7 +638,7 @@ def draw(input_fname, output_fname, iso_bot, iso_top, relative, with_slices):
 
 if __name__ == '__main__':
 	# Parsing the script input arguments
-	parser = argparse.ArgumentParser(description='Processing VTK output from MFEM for visualization via ParaView.')
+	parser = argparse.ArgumentParser(description='Processing VTK output from sliced MFEM grid functions for visualization via ParaView.')
 
 	parser.add_argument('input_filename', type=str, help='input filename')
 
@@ -673,10 +652,10 @@ if __name__ == '__main__':
 		           help='highest margin for the iso volume', default=10000)
 
 	parser.add_argument('-rel','--iso-relative', dest='relative', 
-		           help='Flag to treat iso-volume bounds as relative to data range if true, or not otherwise.', default=False, action='store_true')
+		           help='Flag to treat iso-volume bounds as relative to data range (if active) or as absolute values (default).', default=False, action='store_true')
 
 	parser.add_argument('-slices','--with-slices', dest='with_slices', 
-		           help='Flag to define whether we need to visualize with slices or with a transparent volume.', default=False, action='store_true')
+		           help='Flag to visualize with slices (default is a transparent volume instead).', default=False, action='store_true')
 
 	args = parser.parse_args()
 

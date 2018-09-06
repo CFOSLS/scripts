@@ -645,7 +645,7 @@ if __name__ == '__main__':
 		           help='highest margin for the iso volume', default=10000)
 
 	parser.add_argument('-rel','--iso-relative', dest='relative', 
-		           help='Flag to treat iso-volume bounds as relative to data range if true, or not otherwise.', default=False, action='store_true')
+		           help='Flag to treat iso-volume bounds as relative to data range (if active) or as absolute values (default).', default=False, action='store_true')
 
 	args = parser.parse_args()
 
