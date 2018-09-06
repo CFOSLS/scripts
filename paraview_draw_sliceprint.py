@@ -1,5 +1,5 @@
-import three_slices_sigma_withfunc
-import three_slices_u_withfunc
+import grfun_sliceprint
+import mesh_sliceprint
 import argparse
 import os.path
 import sys
@@ -12,31 +12,15 @@ def ResetSession():
     Disconnect()
     Connect()
 
-# calls drawing script for scalar(u) or vector(sigma) data
-# obtained from MFEM's extension example cfosls_hyperbolic_adref_hcurl_new.cpp
+# calls drawing script for data output from ComputeSlices()
+# obtained from MFEM's extension with CFOSLS
 # by calls like
 '''
-           std::string field_name_sigma("sigma_h");
-           sigma->SaveVTK(fp_sigma, field_name_sigma, ref);
-
-           //std::ofstream fp_S("u_test_it0.vtk");
-           std::string filename_S;
-           filename_S = "u_it_";
-           filename_S.append(std::to_string(it));
-           if (num_procs > 1)
-           {
-               filename_S.append("_proc_");
-               filename_S.append(std::to_string(myid));
-           }
-           filename_S.append(".vtk");
-           std::ofstream fp_S(filename_S);
-
-           pmesh->PrintVTK(fp_S, ref, true);
-           //pmesh->PrintVTK(fp_S);
-
-           std::string field_name_S("u_h");
-           S->SaveVTK(fp_S, field_name_S, ref);
-
+           // gridfunction slices
+           ComputeSlices (*grfun, t0, ntsteps, tstep, myid, nprocs, forvideo, filename_root)
+ 
+           // mesh slices
+           ComputeSlices (*pmesh, t0, ntsteps, tstep, myid, nprocs, filename_root);
 '''
 # names 'sigma_h' and 'u_h' are for now required (but you can modify the script to provide them as an additional parameter)
 # the current script is to be run by pvpython with parameters from the command line
@@ -63,7 +47,7 @@ if __name__ == '__main__':
 		           help='nsteps', default="1")
 
 	parser.add_argument('-t','--type', dest='type', type=int,
-		           help='type: 0(scalar) or 1(vector)', required=True,
+		           help='type: 0(mesh) or 1(grid function)', required=True,
 			   default=0)
 
 	parser.add_argument('-bot','--iso-bot', dest='iso_bot', type=float,
@@ -75,7 +59,10 @@ if __name__ == '__main__':
 	parser.add_argument('-rel','--iso-relative', dest='relative', 
 		           help='Flag to treat iso-volume bounds as relative to data range if true, or as absolute values otherwise.', default=False, action='store_true')
 
-	parser.add_argument('-par','--parallel', dest='parallel', 
+	parser.add_argument('-slices','--with-slices', dest='with_slices', 
+		           help='Flag to define whether we need to visualize with slices or with a transparent volume.', default=False, action='store_true')
+
+	parser.add_argument('-par','--parallel', dest='parallel',  
 		           help='Flag to define whether the input is from a group of parallel processes.', default=False, action='store_true')
 
 	parser.add_argument('-np','--nprocs', dest='nprocs', type=int,
@@ -91,11 +78,10 @@ if __name__ == '__main__':
 			if os.path.exists(filename):
 				if args.type == 0:
 					#sequential version for u
-					three_slices_u_withfunc.draw(filename,"",
-					args.iso_bot, args.iso_top, args.relative)
+					mesh_sliceprint.draw(filename,"", args.with_slices)
 				else:
 					#sequential version for sigma
-					three_slices_sigma_withfunc.draw(filename,"", 					args.iso_bot, args.iso_top, args.relative)
+					grfun_sliceprint.draw(filename,"", args.iso_bot, args.iso_top, args.relative, args.with_slices)
 			else:
 				sys.exit("File cannot be opened")
 		# if input comes from a parallel run
@@ -105,13 +91,12 @@ if __name__ == '__main__':
 
 			if args.type == 0:
 				#parallel version for u
-				three_slices_u_withfunc.draw_par(args.nprocs,
-				fileroot,"", args.iso_bot, args.iso_top,
-				args.relative)
+				mesh_sliceprint.draw_par(args.nprocs,
+				fileroot,"", args.with_slices)
 			else:
 				#parallel version for sigma
-				three_slices_sigma_withfunc.draw_par(args.nprocs,
-				fileroot,"",args.iso_bot, args.iso_top, 				args.relative)
+				grfun_sliceprint.draw_par(args.nprocs,
+				fileroot,"",args.iso_bot, args.iso_top, args.relative, args.with_slices)
 
 		# otherwise python actually doesn't get rid of the previous iteration correctly (i.e. next pictures somehow are influenced by the previous ones which is wrong)			
 		ResetSession()
